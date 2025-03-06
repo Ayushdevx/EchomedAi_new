@@ -36,7 +36,7 @@ import {
   Bell,
   Award
 } from "lucide-react";
-import { useGeminiAssistant } from "@/components/ai-assistant/gemini-assistant-provider";
+import { useDrEcho } from "@/components/ai-assistant/dr-echo-context";
 import { 
   AreaChart, 
   Area, 
@@ -62,7 +62,7 @@ import {
 import { generateFitnessResponse } from "@/lib/fitnessRecommendations";
 
 export default function FitnessTrackerPage() {
-  const { openAssistant, sendMessage } = useGeminiAssistant();
+  const { openAssistant, sendMessage } = useDrEcho();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [calorieGoal, setCalorieGoal] = useState(2200);
   const [caloriesBurned, setCaloriesBurned] = useState(1450);
