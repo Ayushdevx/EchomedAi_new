@@ -22,7 +22,8 @@ import {
   Video,
   FileText,
   Youtube,
-  Map
+  Map,
+  Droplet
 } from "lucide-react";
 
 const mainNavItems = [
@@ -39,6 +40,7 @@ const menuNavItems = [
   { name: "Health Hub", href: "/health-hub", icon: Youtube },
   { name: "Mental Wellness", href: "/mental-wellness", icon: Brain },
   { name: "Fitness Tracker", href: "/fitness-tracker", icon: Dumbbell },
+  { name: "Menstruation Tracker", href: "/menstruation-tracker", icon: Droplet },
   { name: "Maps", href: "/maps", icon: Map },
   { name: "Learning Center", href: "/learning-center", icon: BookOpen },
 ];

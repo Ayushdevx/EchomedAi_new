@@ -25,26 +25,32 @@ import {
 import dynamic from "next/dynamic";
 import { healthDataSets, HealthHeatPoint } from "./data/healthData";
 import HealthDataStats from "./HealthDataStats";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.heat';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { Map as LeafletMap } from 'leaflet';
+import type { MapContainerProps } from 'react-leaflet';
 
-// Dynamically import Leaflet components with no SSR
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
+// Dynamically import the map component with no SSR
+const Map = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
   { ssr: false }
 );
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
+
+const TileLayerComponent = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
   { ssr: false }
 );
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
+
+const MarkerComponent = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
   { ssr: false }
 );
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false }
-);
-const Circle = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Circle),
+
+const PopupComponent = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
   { ssr: false }
 );
 
@@ -118,202 +124,154 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 
 type HealthDataType = 'covid' | 'flu' | 'healthcare_access';
 
-export function MapView() {
-  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [isLocating, setIsLocating] = useState(false);
+interface MapViewProps {
+  showHeatmap?: boolean;
+  center?: [number, number];
+  zoom?: number;
+  markers?: Array<{
+    id: string;
+    position: [number, number];
+    title: string;
+    type: string;
+  }>;
+  heatmapData?: Array<[number, number, number]>;
+  onMarkerClick?: (id: string) => void;
+}
+
+interface MapReadyEvent {
+  target: LeafletMap;
+}
+
+// Custom marker icons
+const createMarkerIcon = (type: string) => {
+  const color = type === 'hospital' ? '#ef4444' : 
+                type === 'clinic' ? '#8b5cf6' : 
+                '#22c55e';
   
-  // Heat map states
-  const [showHeatMap, setShowHeatMap] = useState<boolean>(false);
-  const [heatMapType, setHeatMapType] = useState<HealthDataType>('covid');
-  const [heatMapData, setHeatMapData] = useState<HealthHeatPoint[]>([]);
-  const [heatMapGradient, setHeatMapGradient] = useState<{[key: string]: string}>(
-    healthDataSets.covid.gradient
-  );
-  const [mapKey, setMapKey] = useState<number>(0); // Used to force re-render of map
+  return L.divIcon({
+    html: `
+      <div class="w-8 h-8 -ml-4 -mt-4 bg-white rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-110">
+        <div class="w-6 h-6 rounded-full" style="background-color: ${color}"></div>
+      </div>
+    `,
+    className: '',
+  });
+};
 
-  // Initialize heat map data on component mount
+export function MapView({
+  showHeatmap = false,
+  center = [28.6139, 77.2090], // New Delhi coordinates
+  zoom = 12,
+  markers = [],
+  heatmapData = [],
+  onMarkerClick
+}: MapViewProps) {
+  const mapRef = useRef<LeafletMap | null>(null);
+  const heatmapLayerRef = useRef<L.Layer | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+
   useEffect(() => {
-    // Preload all datasets to ensure they're ready when needed
-    setHeatMapData(healthDataSets.covid.data);
-  }, []);
-
-  // Update the heat map data when the type changes or when heat map is toggled
-  useEffect(() => {
-    setHeatMapData(healthDataSets[heatMapType].data);
-    setHeatMapGradient(healthDataSets[heatMapType].gradient);
-    
-    // Force map component to refresh when heat map is toggled or data changes
-    if (showHeatMap) {
-      setMapKey(prev => prev + 1);
+    // Initialize heat map layer when the map is ready
+    if (isMapReady && showHeatmap && heatmapData.length > 0 && mapRef.current) {
+      if (!heatmapLayerRef.current) {
+        // @ts-ignore - leaflet.heat types are not available
+        heatmapLayerRef.current = L.heatLayer(heatmapData, {
+          radius: 25,
+          blur: 15,
+          maxZoom: 10,
+          gradient: {
+            0.4: '#22c55e',
+            0.6: '#eab308',
+            0.8: '#ef4444'
+          }
+        }).addTo(mapRef.current);
+      }
+    } else if (heatmapLayerRef.current && mapRef.current) {
+      mapRef.current.removeLayer(heatmapLayerRef.current);
+      heatmapLayerRef.current = null;
     }
-  }, [heatMapType, showHeatMap]);
+  }, [isMapReady, showHeatmap, heatmapData]);
 
-  // Toggle for heat map with map refresh
-  const handleHeatMapToggle = (value: boolean) => {
-    setShowHeatMap(value);
-    // Force map refresh when toggling to ensure heat map renders properly
-    setMapKey(prev => prev + 1);
+  const handleMapReady = (e: MapReadyEvent) => {
+    mapRef.current = e.target;
+    setIsMapReady(true);
   };
-
-  // Get user's current location
-  const getUserLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-    
-    setIsLocating(true);
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation([latitude, longitude]);
-        setIsLocating(false);
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        alert("Unable to get your location. " + error.message);
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 }
-    );
-  };
-
-  // Function to handle location selection
-  const handleLocationSelect = (location: MapLocation) => {
-    setSelectedLocation(location);
-  };
-
-  // Get formatted name for the current heat map type
-  const getCurrentHeatMapName = () => healthDataSets[heatMapType].name;
 
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="flex items-center gap-2">
-            <MapIcon className="h-5 w-5" />
-            Healthcare Locations
-          </CardTitle>
-          <CardDescription>
-            Find hospitals, clinics, and pharmacies near you
-          </CardDescription>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Heat Map Controls */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="heat-map-toggle" 
-                checked={showHeatMap} 
-                onCheckedChange={handleHeatMapToggle}
-              />
-              <Label htmlFor="heat-map-toggle" className="cursor-pointer flex items-center gap-1">
-                <Thermometer className="h-4 w-4" />
-                Heat Map
-              </Label>
-            </div>
-            
-            {showHeatMap && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 gap-1">
-                          <Badge variant="outline" className="rounded-sm px-1 font-normal">
-                            {getCurrentHeatMapName()}
-                          </Badge>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>Health Data</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setHeatMapType('covid')}>
-                          COVID-19 Cases
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setHeatMapType('flu')}>
-                          Flu Cases
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setHeatMapType('healthcare_access')}>
-                          Healthcare Access
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Select health data to display</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-
-          {/* User Location Button */}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={getUserLocation}
-            disabled={isLocating}
-            className="flex items-center gap-1"
-          >
-            {isLocating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Locating...
-              </>
-            ) : (
-              <>
-                <Locate className="h-4 w-4" />
-                Use My Location
-              </>
-            )}
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="w-full h-[500px] rounded-md overflow-hidden relative">
-          <MapComponent 
-            key={mapKey} // Force re-render when the key changes
-            locations={sampleLocations}
-            userLocation={userLocation}
-            selectedLocation={selectedLocation}
-            onLocationSelect={handleLocationSelect}
-            showHeatMap={showHeatMap}
-            heatMapType={heatMapType}
-            heatMapData={heatMapData}
-            heatMapGradient={heatMapGradient}
-          />
-        </div>
-
-        <div className="mt-4 space-y-4">
-          {/* Health data statistics, only visible when heat map is enabled */}
-          <HealthDataStats 
-            dataType={heatMapType}
-            data={heatMapData}
-            isVisible={showHeatMap}
-          />
-
-          <h3 className="font-medium">Nearby Healthcare Facilities</h3>
-          <div className="space-y-2">
-            {sampleLocations.map((location) => (
-              <div 
-                key={location.id}
-                className={`p-3 border rounded-md hover:bg-secondary/50 transition-colors cursor-pointer ${selectedLocation?.id === location.id ? 'bg-secondary/70 border-primary' : ''}`}
-                onClick={() => handleLocationSelect(location)}
+    <div className="relative w-full h-full">
+      <Map
+        center={center}
+        zoom={zoom}
+        className="w-full h-full z-0"
+        whenReady={handleMapReady as any} // Type assertion needed due to react-leaflet types
+      >
+        <TileLayerComponent
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <AnimatePresence>
+          {markers.map((marker) => (
+            <motion.div
+              key={marker.id}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <MarkerComponent
+                position={marker.position}
+                icon={createMarkerIcon(marker.type)}
+                eventHandlers={{
+                  click: () => onMarkerClick?.(marker.id)
+                }}
               >
-                <div className="font-medium">{location.name}</div>
-                <div className="text-sm text-muted-foreground">{location.address}</div>
-                <div className="text-xs text-muted-foreground mt-1 capitalize flex items-center gap-1">
-                  <span>Type: {location.type}</span>
-                  <Navigation className="h-3 w-3 ml-auto" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+                <PopupComponent>
+                  <div className="p-2">
+                    <h3 className="font-medium">{marker.title}</h3>
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {marker.type}
+                    </p>
+                  </div>
+                </PopupComponent>
+              </MarkerComponent>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </Map>
+
+      {/* Map Controls */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-10 h-10 bg-background/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center border"
+          onClick={() => mapRef.current?.zoomIn()}
+        >
+          +
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-10 h-10 bg-background/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center border"
+          onClick={() => mapRef.current?.zoomOut()}
+        >
+          -
+        </motion.button>
+      </div>
+
+      {/* Loading Indicator */}
+      <AnimatePresence>
+        {!isMapReady && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center"
+          >
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 } 
