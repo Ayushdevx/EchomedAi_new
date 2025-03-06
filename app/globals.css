@@ -6,6 +6,18 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --chart-green: 142, 100%, 50%;
+  --chart-yellow: 38, 95%, 50%;
+  --chart-purple: 262, 100%, 70%;
+  --chart-blue: 199, 100%, 60%;
+  --chart-pink: 326, 100%, 65%;
+  --chart-orange: 16, 100%, 65%;
+  --chart-teal: 169, 100%, 45%;
+  --mood-color: rgb(77, 148, 255);
+  --anxiety-color: rgb(255, 122, 0);
+  --sleep-color: rgb(138, 43, 226);
+  --energy-color: rgb(255, 193, 7);
+  --focus-color: rgb(0, 200, 83);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1456,4 +1468,863 @@
 @keyframes scaleIn {
   from { transform: scale(0); }
   to { transform: scale(1); }
+}
+
+.mental-wellness {
+  background: linear-gradient(135deg, rgb(0, 15, 2), rgb(0, 8, 0));
+  border-radius: 24px;
+  padding: 2rem;
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
+}
+
+.wellness-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.header-content h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  margin-bottom: 0.5rem;
+}
+
+.header-content p {
+  color: hsl(var(--primary)/0.7);
+  font-size: 0.875rem;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 0.5rem;
+  background: hsl(var(--primary)/0.1);
+  padding: 0.25rem;
+  border-radius: 9999px;
+}
+
+.range-button {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  color: hsl(var(--primary));
+  transition: all 0.2s ease;
+}
+
+.range-button:hover {
+  background: hsl(var(--primary)/0.1);
+}
+
+.range-button.active {
+  background: hsl(var(--primary));
+  color: rgb(0, 12, 0);
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: hsl(var(--primary)/0.1);
+  border: 1px solid hsl(var(--primary)/0.2);
+  border-radius: 12px;
+  color: hsl(var(--primary));
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background: hsl(var(--primary)/0.15);
+  transform: translateY(-1px);
+}
+
+.tab-button.active {
+  background: hsl(var(--primary));
+  color: rgb(0, 12, 0);
+  border-color: hsl(var(--primary));
+}
+
+.trends-section,
+.patterns-section,
+.insights-section {
+  display: grid;
+  gap: 2rem;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.chart-card {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)/0.05) 0%,
+    hsl(var(--primary)/0.02) 100%
+  );
+  border: 1px solid hsl(var(--primary)/0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  border-color: hsl(var(--primary)/0.2);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 20px -4px hsl(var(--primary)/0.1),
+    0 8px 40px -4px hsl(var(--primary)/0.1);
+}
+
+.chart-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at top right,
+    hsl(var(--primary)/0.1),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.chart-card:hover::before {
+  opacity: 1;
+}
+
+.chart-card h3 {
+  font-size: 1.125rem;
+  color: hsl(var(--primary));
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chart-card h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary)/0.2),
+    transparent
+  );
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  padding: 1rem;
+  background: hsl(var(--primary)/0.02);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    repeating-linear-gradient(
+      to right,
+      transparent 0px,
+      transparent 39px,
+      hsl(var(--primary)/0.02) 40px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 39px,
+      hsl(var(--primary)/0.02) 40px
+    );
+  pointer-events: none;
+}
+
+.chart-container canvas {
+  filter: drop-shadow(0 4px 12px hsl(var(--primary)/0.2));
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  background: rgba(0, 20, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.metric-label {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: hsl(var(--primary)/0.1);
+}
+
+.trend-indicator.up { color: hsl(142, 100%, 50%); }
+.trend-indicator.down { color: hsl(0, 100%, 65%); }
+.trend-indicator.stable { color: hsl(var(--primary)); }
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.metric-unit {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.metric-impact {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.metric-impact.positive {
+  background: hsl(142, 100%, 35%, 0.1);
+  color: hsl(142, 100%, 50%);
+}
+
+.metric-impact.negative {
+  background: hsl(0, 100%, 35%, 0.1);
+  color: hsl(0, 100%, 65%);
+}
+
+.metric-impact.neutral {
+  background: hsl(var(--primary)/0.1);
+  color: hsl(var(--primary));
+}
+
+.patterns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.pattern-card {
+  background: hsl(var(--primary)/0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.pattern-card h3 {
+  font-size: 1.125rem;
+  color: hsl(var(--primary));
+  margin-bottom: 1.5rem;
+}
+
+.triggers-grid,
+.activities-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.trigger-tag {
+  padding: 0.5rem 1rem;
+  background: hsl(0, 100%, 35%, 0.1);
+  border: 1px solid hsl(0, 100%, 50%, 0.2);
+  border-radius: 9999px;
+  color: hsl(0, 100%, 65%);
+  font-size: 0.875rem;
+}
+
+.activity-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: hsl(142, 100%, 35%, 0.1);
+  border: 1px solid hsl(142, 100%, 50%, 0.2);
+  border-radius: 9999px;
+  color: hsl(142, 100%, 50%);
+  font-size: 0.875rem;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.insight-card {
+  background: hsl(var(--primary)/0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.insight-card h3 {
+  font-size: 1.125rem;
+  color: hsl(var(--primary));
+  margin-bottom: 1.5rem;
+}
+
+.recommendations-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.recommendation-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: hsl(var(--primary)/0.1);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.recommendation-item:hover {
+  background: hsl(var(--primary)/0.15);
+  transform: translateY(-2px);
+}
+
+.recommendation-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: hsl(var(--primary)/0.1);
+  border-radius: 10px;
+  color: hsl(var(--primary));
+}
+
+.recommendation-content h4 {
+  color: hsl(var(--primary));
+  margin-bottom: 0.25rem;
+}
+
+.recommendation-content p {
+  font-size: 0.875rem;
+  color: hsl(var(--primary)/0.7);
+  line-height: 1.5;
+}
+
+.correlations-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.correlation-item {
+  padding: 1rem;
+  background: hsl(var(--primary)/0.1);
+  border-radius: 12px;
+}
+
+.correlation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.correlation-label {
+  font-size: 0.875rem;
+  color: hsl(var(--primary));
+}
+
+.correlation-value {
+  font-weight: 500;
+}
+
+.correlation-item.positive .correlation-value {
+  color: hsl(142, 100%, 50%);
+}
+
+.correlation-item.negative .correlation-value {
+  color: hsl(0, 100%, 65%);
+}
+
+.correlation-bar {
+  height: 4px;
+  background: hsl(var(--primary)/0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.correlation-fill {
+  height: 100%;
+  background: hsl(var(--primary));
+  border-radius: 2px;
+  transition: width 1s ease-out;
+}
+
+.correlation-item.positive .correlation-fill {
+  background: hsl(142, 100%, 50%);
+}
+
+.correlation-item.negative .correlation-fill {
+  background: hsl(0, 100%, 65%);
+}
+
+.patterns-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pattern-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: hsl(var(--primary)/0.1);
+  border-radius: 8px;
+}
+
+.day-label {
+  font-size: 0.875rem;
+  color: hsl(var(--primary));
+  width: 100px;
+}
+
+.mood-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: hsl(var(--primary)/0.1);
+  border-radius: 8px;
+  color: hsl(var(--primary));
+}
+
+.mood-label {
+  font-size: 0.875rem;
+  color: hsl(var(--primary)/0.7);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.recommendation-icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.metric-card {
+  animation: float 4s ease-in-out infinite;
+  animation-delay: calc(var(--animation-delay, 0) * 1s);
+}
+
+.metric-card:nth-child(1) { --animation-delay: 0; }
+.metric-card:nth-child(2) { --animation-delay: 0.2; }
+.metric-card:nth-child(3) { --animation-delay: 0.4; }
+
+/* Enhanced animations for charts */
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-card {
+  animation: chartFadeIn 0.5s ease-out forwards;
+}
+
+.charts-row .chart-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.charts-row .chart-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+/* Glowing effect for chart points */
+.chart-point {
+  position: relative;
+}
+
+.chart-point::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  animation: pulse 2s infinite;
+}
+
+/* Enhanced legend styles */
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: hsl(var(--primary)/0.05);
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--primary)/0.8);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Enhanced tooltip styles */
+.chart-tooltip {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--primary)/0.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+}
+
+.tooltip-label {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-value {
+  color: hsl(var(--primary)/0.7);
+}
+
+/* Specific metric colors */
+.metric-mood {
+  color: rgb(77, 148, 255);
+  text-shadow: 0 0 10px rgba(77, 148, 255, 0.3);
+}
+
+.metric-anxiety {
+  color: rgb(255, 122, 0);
+  text-shadow: 0 0 10px rgba(255, 122, 0, 0.3);
+}
+
+.metric-sleep {
+  color: rgb(138, 43, 226);
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+.metric-energy {
+  color: rgb(255, 193, 7);
+  text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+}
+
+.metric-focus {
+  color: rgb(0, 200, 83);
+  text-shadow: 0 0 10px rgba(0, 200, 83, 0.3);
+}
+
+.metric-slider {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  position: relative;
+  margin: 1rem 0;
+  overflow: visible;
+}
+
+.slider-fill {
+  position: absolute;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.metric-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-tag.good {
+  background: rgba(0, 200, 83, 0.2);
+  color: rgb(0, 200, 83);
+  text-shadow: 0 0 10px rgba(0, 200, 83, 0.3);
+}
+
+.status-tag.mild {
+  background: rgba(255, 193, 7, 0.2);
+  color: rgb(255, 193, 7);
+  text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+}
+
+.status-tag.neutral {
+  background: rgba(77, 148, 255, 0.2);
+  color: rgb(77, 148, 255);
+  text-shadow: 0 0 10px rgba(77, 148, 255, 0.3);
+}
+
+.status-tag.na {
+  background: rgba(138, 43, 226, 0.2);
+  color: rgb(138, 43, 226);
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+/* Enhanced slider track styles */
+.metric-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced slider thumb styles */
+.metric-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-top: -6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.metric-slider.mood::-webkit-slider-thumb { background: var(--mood-color); }
+.metric-slider.anxiety::-webkit-slider-thumb { background: var(--anxiety-color); }
+.metric-slider.sleep::-webkit-slider-thumb { background: var(--sleep-color); }
+.metric-slider.energy::-webkit-slider-thumb { background: var(--energy-color); }
+.metric-slider.focus::-webkit-slider-thumb { background: var(--focus-color); }
+
+/* Glowing effect for active metrics */
+.metric-card.active {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.metric-card.active .metric-value {
+  text-shadow: 0 0 20px currentColor;
+}
+
+.metric-card.active .slider-fill {
+  box-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor;
+}
+
+/* Hover effects */
+.metric-card:hover .slider-fill {
+  box-shadow: 
+    0 0 15px currentColor,
+    0 0 30px currentColor;
+}
+
+.metric-card:hover .metric-value {
+  text-shadow: 
+    0 0 15px currentColor,
+    0 0 30px currentColor;
+}
+
+/* Scale labels with gradients */
+.scale-label {
+  position: relative;
+  padding-top: 1.5rem;
+}
+
+.scale-label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 0.75rem;
+  background: currentColor;
+  opacity: 0.3;
+}
+
+/* Animated background for active metrics */
+.metric-card.active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.slider-container {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  margin: 0.5rem 0;
+}
+
+.metric-slider {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  margin: 0;
+  opacity: 0; /* Hide the actual slider, we'll style our own */
+  z-index: 5;
+  cursor: pointer;
+}
+
+.slider-track {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: visible;
+}
+
+.slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+/* Glow effects for thumbs */
+.slider-thumb::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 15px currentColor;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.metric-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.metric-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.75rem;
+}
+
+/* Define track colors */
+.mood-track {
+  background: linear-gradient(to right, rgba(77, 148, 255, 0.2), rgb(77, 148, 255)) !important;
+}
+
+.anxiety-track {
+  background: linear-gradient(to right, rgba(255, 122, 0, 0.2), rgb(255, 122, 0)) !important;
+}
+
+.sleep-track {
+  background: linear-gradient(to right, rgba(138, 43, 226, 0.2), rgb(138, 43, 226)) !important;
+}
+
+.energy-track {
+  background: linear-gradient(to right, rgba(255, 193, 7, 0.2), rgb(255, 193, 7)) !important;
+}
+
+.focus-track {
+  background: linear-gradient(to right, rgba(0, 200, 83, 0.2), rgb(0, 200, 83)) !important;
+}
+
+/* Hover effects for metric cards */
+.metric-card:hover .slider-thumb {
+  box-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.metric-card:hover .slider-track {
+  height: 5px;
 }
