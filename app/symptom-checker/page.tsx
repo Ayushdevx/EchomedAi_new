@@ -11,10 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, ArrowRight, Brain, CheckCircle, ChevronLeft, ChevronRight, Heart, Settings as Lungs, Pill, Stethoscope } from "lucide-react";
-import { useGeminiAssistant } from "@/components/ai-assistant/gemini-assistant-provider";
+import { useDrEcho } from "@/components/ai-assistant/dr-echo-context";
 
 export default function SymptomCheckerPage() {
-  const { openAssistant } = useGeminiAssistant();
+  const { openAssistant, sendMessage } = useDrEcho();
   const [currentStep, setCurrentStep] = useState(1);
   const [progress, setProgress] = useState(20);
   const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null);
@@ -79,23 +79,14 @@ Additional information: ${additionalInfo || 'None provided'}
 Based on these symptoms, what might be the possible causes, and what should I do next?
 `;
     
-    // Open the AI assistant and send the message
+    // Open the assistant first
     openAssistant();
+    
+    // Then send the message directly using the provider's sendMessage function
+    // This bypasses the DOM manipulation which could be causing issues
     setTimeout(() => {
-      const inputElement = document.querySelector('input[placeholder="Type your health question..."]') as HTMLInputElement;
-      if (inputElement) {
-        inputElement.value = message;
-        // Trigger a change event to update the input value
-        const event = new Event('input', { bubbles: true });
-        inputElement.dispatchEvent(event);
-        
-        // Find and click the send button
-        const sendButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
-        if (sendButton) {
-          sendButton.click();
-        }
-      }
-    }, 500);
+      sendMessage(message);
+    }, 300);
   };
   
   const renderStepContent = () => {

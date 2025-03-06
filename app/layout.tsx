@@ -5,9 +5,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { AIAssistantProvider } from '@/components/ai-assistant/ai-assistant-provider';
-import { GeminiAssistantProvider, GeminiAssistantDialogWrapper } from '@/components/ai-assistant/gemini-assistant-provider';
-import GeminiAssistantButton from '@/components/ai-assistant/gemini-assistant-button';
+import { DrEchoProvider } from '@/components/ai-assistant/dr-echo-context';
+import { DrEchoButton, DrEchoStyles } from '@/components/ai-assistant/dr-echo-button';
 import { Toaster as SonnerToaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -31,17 +30,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <GeminiAssistantProvider>
+          <DrEchoProvider>
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
-            <GeminiAssistantButton />
-            <GeminiAssistantDialogWrapper />
+            <DrEchoButton />
+            <DrEchoStyles />
             <Toaster />
             <SonnerToaster position="top-right" closeButton theme="dark" richColors />
-          </GeminiAssistantProvider>
+          </DrEchoProvider>
         </ThemeProvider>
       </body>
     </html>

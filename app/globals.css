@@ -1471,12 +1471,12 @@
 }
 
 .mental-wellness {
-  background: linear-gradient(135deg, rgb(0, 15, 2), rgb(0, 8, 0));
-  border-radius: 24px;
+  background: rgba(0, 40, 0, 0.9);
+  border-radius: 16px;
   padding: 2rem;
-  min-height: 600px;
-  position: relative;
-  overflow: hidden;
+  color: white;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .wellness-header {
@@ -1672,6 +1672,9 @@
   border-radius: 16px;
   padding: 1.5rem;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: visible;
+  margin-bottom: 1rem;
 }
 
 .metric-card:hover {
@@ -2228,8 +2231,8 @@
 .slider-container {
   position: relative;
   width: 100%;
-  height: 30px;
-  margin: 0.5rem 0;
+  height: 36px;
+  margin: 1.5rem 0;
 }
 
 .metric-slider {
@@ -2248,8 +2251,8 @@
   transform: translateY(-50%);
   width: 100%;
   height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background: rgba(20, 30, 20, 0.3);
   overflow: visible;
 }
 
@@ -2257,12 +2260,12 @@
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px currentColor;
   z-index: 10;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 /* Glow effects for thumbs */
@@ -2272,8 +2275,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: transparent;
   box-shadow: 0 0 15px currentColor;
@@ -2285,7 +2288,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .metric-scale {
@@ -2293,7 +2296,7 @@
   justify-content: space-between;
   font-size: 0.75rem;
   opacity: 0.8;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 /* Define track colors */
@@ -2317,14 +2320,53 @@
   background: linear-gradient(to right, rgba(0, 200, 83, 0.2), rgb(0, 200, 83)) !important;
 }
 
-/* Hover effects for metric cards */
+/* Hover effects for sliders */
 .metric-card:hover .slider-thumb {
-  box-shadow: 
-    0 0 10px currentColor,
-    0 0 20px currentColor;
-  transform: translate(-50%, -50%) scale(1.1);
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
 }
 
 .metric-card:hover .slider-track {
   height: 5px;
+}
+
+/* Make slider thumbs match their respective colors */
+.mood-slider ~ .slider-thumb {
+  background-color: rgb(77, 148, 255);
+  box-shadow: 0 0 10px rgb(77, 148, 255);
+}
+
+.anxiety-slider ~ .slider-thumb {
+  background-color: rgb(255, 122, 0);
+  box-shadow: 0 0 10px rgb(255, 122, 0);
+}
+
+.sleep-slider ~ .slider-thumb {
+  background-color: rgb(138, 43, 226);
+  box-shadow: 0 0 10px rgb(138, 43, 226);
+}
+
+.energy-slider ~ .slider-thumb {
+  background-color: rgb(255, 193, 7);
+  box-shadow: 0 0 10px rgb(255, 193, 7);
+}
+
+.focus-slider ~ .slider-thumb {
+  background-color: rgb(0, 200, 83);
+  box-shadow: 0 0 10px rgb(0, 200, 83);
+}
+
+/* Enhanced glow for tracks */
+.slider-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  filter: blur(4px);
+  opacity: 0.6;
+  background: inherit;
+  z-index: -1;
 }

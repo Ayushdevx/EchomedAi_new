@@ -486,6 +486,36 @@ export function GeminiAssistantProvider({ children }: { children: ReactNode }) {
       
       console.log("Attempting to use direct API implementation...");
       
+      // Check if API key is available
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY;
+      if (!apiKey || apiKey === 'your_api_key_here') {
+        console.warn("No valid Gemini API key found. Using fallback response system.");
+        
+        // Use fallback response system
+        const fallbackResponse = await generateFallbackStreamingResponse(
+          message,
+          (text) => {
+            setCurrentResponse(text);
+          }
+        );
+        
+        const aiMessage: Message = {
+          id: uuidv4(),
+          role: "assistant",
+          content: fallbackResponse + "\n\nNote: I'm currently running in limited mode because the API key is not configured. Please set up the Gemini API key for full functionality.",
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, aiMessage]);
+        
+        if (textToSpeechEnabled) {
+          speakMessage(fallbackResponse);
+        }
+        
+        setIsTyping(false);
+        return;
+      }
+      
       // Format a simple prompt with the system message and user's message
       const systemPrompt = "You are Dr. Echo, an EchoMed AI health assistant. Answer the following health question helpfully and accurately.";
       const fullPrompt = `${systemPrompt}\n\nUser's question: ${message}`;
@@ -513,6 +543,9 @@ export function GeminiAssistantProvider({ children }: { children: ReactNode }) {
             setCurrentResponse(text);
           }
         );
+        
+        // Add a note to the response explaining fallback
+        finalResponse += "\n\nNote: I'm currently using a limited response system because the AI service connection experienced an issue.";
         console.log("Using fallback response system");
       }
       
@@ -537,7 +570,7 @@ export function GeminiAssistantProvider({ children }: { children: ReactNode }) {
       const errorMessage: Message = {
         id: uuidv4(),
         role: "assistant",
-        content: "I'm sorry, there was an error processing your request. Please try again.",
+        content: "I'm sorry, there was an error processing your request. Please try again later.\n\nIf this persists, please check that the Gemini API key is properly configured.",
         timestamp: new Date(),
       };
       
@@ -588,7 +621,6 @@ export function GeminiAssistantProvider({ children }: { children: ReactNode }) {
       value={contextValue}
     >
       {children}
-      {isOpen && <GeminiAssistantDialog />}
     </GeminiAssistantContext.Provider>
   );
 }

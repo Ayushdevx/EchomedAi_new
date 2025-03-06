@@ -26,11 +26,34 @@ import {
   Volume2,
   Waves
 } from "lucide-react";
-import { useGeminiAssistant } from "@/components/ai-assistant/gemini-assistant-provider";
+import { useDrEcho } from "@/components/ai-assistant/dr-echo-context";
 import { generateMentalWellnessResponse } from "@/lib/mentalWellnessRecommendations";
+import { AnimatedHeart } from '@/components/ui/animated-heart';
+
+// Function to render the floating heart icon
+function FloatingHeartIcon() {
+  return (
+    <motion.div
+      className="absolute right-8 top-24 z-10 hidden md:block"
+      initial={{ y: 0 }}
+      animate={{ y: [0, -15, 0] }}
+      transition={{ 
+        duration: 3, 
+        repeat: Infinity, 
+        ease: "easeInOut" 
+      }}
+    >
+      <AnimatedHeart 
+        size={60} 
+        color="rgba(255, 51, 102, 0.8)" 
+        pulseColor="rgba(255, 102, 153, 0.8)"
+      />
+    </motion.div>
+  );
+}
 
 export default function MentalWellnessPage() {
-  const { openAssistant, sendMessage } = useGeminiAssistant();
+  const { openAssistant, sendMessage } = useDrEcho();
   const [activeTab, setActiveTab] = useState("assessment");
   const [moodScore, setMoodScore] = useState<number>(7);
   const [anxietyLevel, setAnxietyLevel] = useState<number>(3);
@@ -182,6 +205,8 @@ Based on this information, could you provide some personalized mental wellness r
           Track, assess, and improve your mental wellbeing
         </p>
       </motion.div>
+      
+      <FloatingHeartIcon />
       
       <Tabs defaultValue="assessment" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-4 w-full mb-8">
