@@ -25,11 +25,13 @@ import {
   Map
 } from "lucide-react";
 
-const navItems = [
-  { name: "Home", href: "/", icon: Heart },
+const mainNavItems = [
   { name: "Dashboard", href: "/dashboard", icon: Activity },
   { name: "Analysis", href: "/analysis", icon: BarChart2 },
   { name: "Symptom Checker", href: "/symptom-checker", icon: Stethoscope },
+];
+
+const menuNavItems = [
   { name: "Doctor Appointments", href: "/doctor-appointments", icon: Calendar },
   { name: "VR Doctor", href: "/vr-doctor", icon: Video },
   { name: "Patient Report Analysis", href: "/patient-report", icon: FileText },
@@ -72,9 +74,9 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Only 3 Main Items */}
           <nav className="hidden md:flex items-center space-x-4">
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -95,11 +97,11 @@ export function Header() {
             <ModeToggle />
             <Button className="hidden md:flex">Get Started</Button>
             
-            {/* Mobile Menu Button */}
+            {/* Hamburger Menu Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="relative"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
@@ -112,32 +114,56 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile and Additional Items Menu */}
       {isMobileMenuOpen && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="md:hidden border-t bg-background"
+          className="border-t bg-background"
         >
-          <div className="container mx-auto px-4 py-4 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center py-2 px-3 text-base font-medium transition-colors hover:text-primary rounded-md",
-                  pathname === item.href
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground"
-                )}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <item.icon className="mr-2 h-5 w-5" />
-                {item.name}
-              </Link>
-            ))}
-            <Button className="w-full mt-4">Get Started</Button>
+          <div className="container mx-auto px-4 py-4">
+            {/* Show main nav items on mobile */}
+            <div className="md:hidden space-y-1 mb-4">
+              {mainNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center py-2 px-3 text-base font-medium transition-colors hover:text-primary rounded-md",
+                    pathname === item.href
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground"
+                  )}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <item.icon className="mr-2 h-5 w-5" />
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Additional menu items for both mobile and desktop */}
+            <div className="space-y-1">
+              {menuNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center py-2 px-3 text-base font-medium transition-colors hover:text-primary rounded-md",
+                    pathname === item.href
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground"
+                  )}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <item.icon className="mr-2 h-5 w-5" />
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            
+            <Button className="w-full mt-4 md:hidden">Get Started</Button>
           </div>
         </motion.div>
       )}
