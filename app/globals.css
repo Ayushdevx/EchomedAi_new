@@ -2370,3 +2370,345 @@
   background: inherit;
   z-index: -1;
 }
+
+/* Daily Wellness Check-in Styles */
+.mood-metric-container,
+.anxiety-metric-container,
+.sleep-metric-container,
+.energy-metric-container,
+.focus-metric-container {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.mood-metric-container:hover,
+.anxiety-metric-container:hover,
+.sleep-metric-container:hover,
+.energy-metric-container:hover,
+.focus-metric-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.dark .mood-metric-container,
+.dark .anxiety-metric-container,
+.dark .sleep-metric-container,
+.dark .energy-metric-container,
+.dark .focus-metric-container {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Replacing emoji indicators with segment indicators */
+.mood-indicator-bar,
+.anxiety-indicator-bar,
+.sleep-indicator-bar,
+.energy-indicator-bar,
+.focus-indicator-bar {
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+.mood-indicator-segments,
+.anxiety-indicator-segments,
+.sleep-indicator-segments,
+.energy-indicator-segments,
+.focus-indicator-segments {
+  display: flex;
+  height: 6px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.mood-segment,
+.anxiety-segment,
+.sleep-segment,
+.energy-segment,
+.focus-segment {
+  flex: 1;
+  height: 100%;
+  transition: all 0.3s ease;
+  margin: 0 1px;
+  border-radius: 4px;
+}
+
+.mood-segment.active,
+.anxiety-segment.active,
+.sleep-segment.active,
+.energy-segment.active,
+.focus-segment.active {
+  transform: scaleY(1.2);
+}
+
+/* Improving slider styles with translucent gradients */
+.mood-slider [data-radix-slider-thumb] {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(96, 165, 250, 0.9));
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.anxiety-slider [data-radix-slider-thumb] {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.9), rgba(251, 146, 60, 0.9));
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2);
+}
+
+.sleep-slider [data-radix-slider-thumb] {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(167, 139, 250, 0.9));
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+
+.energy-slider [data-radix-slider-thumb] {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.9), rgba(250, 204, 21, 0.9));
+  box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.2);
+}
+
+.focus-slider [data-radix-slider-thumb] {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(74, 222, 128, 0.9));
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+}
+
+/* Custom range color tracks with translucent gradients */
+.mood-slider [data-radix-slider-range] {
+  background: linear-gradient(to right, rgba(147, 197, 253, 0.4), rgba(59, 130, 246, 0.7));
+  backdrop-filter: blur(4px);
+}
+
+.anxiety-slider [data-radix-slider-range] {
+  background: linear-gradient(to right, rgba(253, 186, 116, 0.4), rgba(249, 115, 22, 0.7));
+  backdrop-filter: blur(4px);
+}
+
+.sleep-slider [data-radix-slider-range] {
+  background: linear-gradient(to right, rgba(196, 181, 253, 0.4), rgba(139, 92, 246, 0.7));
+  backdrop-filter: blur(4px);
+}
+
+.energy-slider [data-radix-slider-range] {
+  background: linear-gradient(to right, rgba(254, 240, 138, 0.4), rgba(250, 204, 21, 0.7));
+  backdrop-filter: blur(4px);
+}
+
+.focus-slider [data-radix-slider-range] {
+  background: linear-gradient(to right, rgba(134, 239, 172, 0.4), rgba(34, 197, 94, 0.7));
+  backdrop-filter: blur(4px);
+}
+
+/* Slider track background with subtle translucent style */
+[data-radix-slider-track] {
+  background: rgba(226, 232, 240, 0.3) !important;
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.dark [data-radix-slider-track] {
+  background: rgba(30, 41, 59, 0.4) !important;
+  border: 1px solid rgba(30, 41, 59, 0.6);
+}
+
+/* Special effect for active sliders */
+.mood-slider:active [data-radix-slider-range],
+.anxiety-slider:active [data-radix-slider-range],
+.sleep-slider:active [data-radix-slider-range],
+.energy-slider:active [data-radix-slider-range],
+.focus-slider:active [data-radix-slider-range] {
+  opacity: 0.9;
+  filter: brightness(1.2);
+}
+
+/* Remove these since we're no longer using emojis */
+.mood-emoji-indicators,
+.anxiety-emoji-indicators,
+.sleep-emoji-indicators,
+.energy-emoji-indicators,
+.focus-emoji-indicators {
+  display: none;
+}
+
+.emoji {
+  display: none;
+}
+
+@keyframes pulseSegment {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.mood-segment:last-child.active,
+.anxiety-segment:last-child.active,
+.sleep-segment:last-child.active,
+.energy-segment:last-child.active,
+.focus-segment:last-child.active {
+  animation: pulseSegment 2s infinite;
+}
+
+/* Updated styles for custom sliders */
+.mood-slider-container,
+.anxiety-slider-container,
+.sleep-slider-container,
+.energy-slider-container,
+.focus-slider-container {
+  position: relative;
+  height: 20px;
+  margin: 20px 0 30px;
+  width: 100%;
+}
+
+.mood-indicator-segments,
+.anxiety-indicator-segments,
+.sleep-indicator-segments,
+.energy-indicator-segments,
+.focus-indicator-segments {
+  display: flex;
+  height: 8px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.mood-segment,
+.anxiety-segment,
+.sleep-segment,
+.energy-segment,
+.focus-segment {
+  flex: 1;
+  height: 100%;
+  transition: all 0.3s ease;
+  margin: 0 1px;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.mood-segment.active,
+.anxiety-segment.active,
+.sleep-segment.active,
+.energy-segment.active,
+.focus-segment.active {
+  transform: scaleY(1.2);
+}
+
+.slider-thumb-custom {
+  position: absolute;
+  top: -4px; 
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  z-index: 2;
+  cursor: grab;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+  transform: translateX(-50%);
+}
+
+.slider-thumb-custom:hover {
+  transform: translateX(-50%) scale(1.2);
+}
+
+.slider-thumb-custom:active {
+  cursor: grabbing;
+  transform: translateX(-50%) scale(1.3);
+}
+
+/* Specific styles for each thumb */
+.mood-slider-container .slider-thumb-custom {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  border: 2px solid white;
+}
+
+.anxiety-slider-container .slider-thumb-custom {
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  border: 2px solid white;
+}
+
+.sleep-slider-container .slider-thumb-custom {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  border: 2px solid white;
+}
+
+.energy-slider-container .slider-thumb-custom {
+  background: linear-gradient(135deg, #eab308, #facc15);
+  border: 2px solid white;
+}
+
+.focus-slider-container .slider-thumb-custom {
+  background: linear-gradient(135deg, #22c55e, #4ade80);
+  border: 2px solid white;
+}
+
+.hidden-range-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+/* Labels below the sliders */
+.mood-slider-container::after,
+.anxiety-slider-container::after,
+.sleep-slider-container::after,
+.energy-slider-container::after,
+.focus-slider-container::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  bottom: -24px;
+  font-size: 0.75rem;
+  color: var(--foreground-muted);
+}
+
+.mood-slider-container::after {
+  content: "Very Low \A0\A0\A0\A0\A0\A0 Neutral \A0\A0\A0\A0\A0\A0 Excellent";
+}
+
+.anxiety-slider-container::after {
+  content: "None \A0\A0\A0\A0\A0\A0 Moderate \A0\A0\A0\A0\A0\A0 Severe";
+}
+
+.sleep-slider-container::after {
+  content: "Poor \A0\A0\A0\A0\A0\A0 Average \A0\A0\A0\A0\A0\A0 Excellent";
+}
+
+.energy-slider-container::after {
+  content: "Exhausted \A0\A0\A0\A0\A0\A0 Neutral \A0\A0\A0\A0\A0\A0 Very Energetic";
+}
+
+.focus-slider-container::after {
+  content: "Distracted \A0\A0\A0\A0\A0\A0 Moderate \A0\A0\A0\A0\A0\A0 Highly Focused";
+}
+
+/* Remove old styles that are no longer needed */
+.mood-emoji-indicators,
+.anxiety-emoji-indicators,
+.sleep-emoji-indicators,
+.energy-emoji-indicators,
+.focus-emoji-indicators,
+.emoji {
+  display: none;
+}
+
+/* Glow effect for active segments */
+.mood-segment:last-child.active,
+.anxiety-segment:last-child.active,
+.sleep-segment:last-child.active,
+.energy-segment:last-child.active,
+.focus-segment:last-child.active {
+  animation: pulseSegment 2s infinite;
+}
