@@ -1,175 +1,122 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Mic, StopCircle, Play, Loader2 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from "react";
+import { Stethoscope, Heart, Activity, TrendingUp, TrendingDown, Brain, AlertCircle } from "lucide-react";
 
 export function RecordingInterface() {
-  const [recordingState, setRecordingState] = useState<"idle" | "recording" | "recorded" | "analyzing">("idle");
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [heartRate, setHeartRate] = useState(72);
+  const [confidence, setConfidence] = useState(98.7);
+  const [variability, setVariability] = useState(45);
+  const [trend, setTrend] = useState<"up" | "down" | null>(null);
   
-  const startRecording = () => {
-    setRecordingState("recording");
-    setRecordingTime(0);
-    
-    // Simulate recording time progress
+  useEffect(() => {
     const interval = setInterval(() => {
-      setRecordingTime(prev => {
-        if (prev >= 30) {
-          clearInterval(interval);
-          setRecordingState("recorded");
-          return 30;
-        }
-        return prev + 1;
+      setHeartRate(prev => {
+        const variation = Math.random() * 2 - 1;
+        const newRate = Number((prev + variation).toFixed(1));
+        setTrend(newRate > prev ? "up" : "down");
+        return newRate;
       });
-    }, 1000);
-  };
-  
-  const stopRecording = () => {
-    setRecordingState("recorded");
-  };
-  
-  const analyzeRecording = () => {
-    setRecordingState("analyzing");
-    setProgress(0);
+      
+      setVariability(prev => {
+        const change = Math.random() * 2 - 1;
+        return Number((prev + change).toFixed(1));
+      });
+    }, 2000);
     
-    // Simulate analysis progress
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          // In a real app, this would trigger the display of results
-          return 100;
-        }
-        return prev + 5;
-      });
-    }, 200);
-  };
-  
-  const resetRecording = () => {
-    setRecordingState("idle");
-    setRecordingTime(0);
-    setProgress(0);
-  };
-  
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Record Health Sounds</CardTitle>
-        <CardDescription>
-          Capture heart or lung sounds for AI analysis
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="h-48 rounded-lg bg-muted ecg-grid flex items-center justify-center relative overflow-hidden">
-          {recordingState === "idle" && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center"
-            >
-              <Mic className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">Ready to record</p>
-            </motion.div>
-          )}
-          
-          {recordingState === "recording" && (
-            <div className="w-full h-full">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full bg-destructive/20 flex items-center justify-center pulse-animation">
-                  <div className="h-12 w-12 rounded-full bg-destructive/30 flex items-center justify-center">
-                    <div className="h-8 w-8 rounded-full bg-destructive flex items-center justify-center">
-                      <Mic className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <svg className="waveform-line" viewBox="0 0 1000 200" preserveAspectRatio="none">
-                <path
-                  d="M0,100 Q25,90 50,100 T100,110 T150,90 T200,80 T250,100 T300,120 T350,90 T400,70 T450,110 T500,130 T550,90 T600,80 T650,100 T700,120 T750,90 T800,70 T850,110 T900,100 T950,90 T1000,100"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
-            </div>
-          )}
-          
-          {recordingState === "recorded" && (
-            <div className="w-full h-full">
-              <svg className="waveform-line" viewBox="0 0 1000 200" preserveAspectRatio="none">
-                <path
-                  d="M0,100 Q25,90 50,100 T100,110 T150,90 T200,80 T250,100 T300,120 T350,90 T400,70 T450,110 T500,130 T550,90 T600,80 T650,100 T700,120 T750,90 T800,70 T850,110 T900,100 T950,90 T1000,100"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
-              
-              <div className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm rounded-md px-3 py-1 text-sm flex items-center">
-                <Play className="h-3 w-3 mr-1" />
-                <span>30 seconds</span>
-              </div>
-            </div>
-          )}
-          
-          {recordingState === "analyzing" && (
-            <div className="text-center">
-              <Loader2 className="h-12 w-12 mx-auto text-primary animate-spin mb-2" />
-              <p className="text-muted-foreground">Analyzing recording...</p>
-              <div className="max-w-xs mx-auto mt-4">
-                <Progress value={progress} className="h-2" />
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex items-center justify-between">
+    <div className="heart-monitor">
+      <div className="monitor-header">
+        <div className="monitor-title">
+          <div className="monitor-icon">
+            <Stethoscope className="h-6 w-6 text-primary" />
+          </div>
           <div>
-            {recordingState === "recording" && (
-              <div className="flex items-center">
-                <div className="h-2 w-2 rounded-full bg-destructive animate-pulse mr-2" />
-                <span className="text-sm font-medium">Recording: {recordingTime}s</span>
-              </div>
-            )}
+            <h1 className="text-xl text-primary">Heart Analysis</h1>
+            <p className="text-sm text-primary/60">Real-time Monitoring</p>
           </div>
-          
-          <div className="flex space-x-2">
-            {recordingState === "idle" && (
-              <Button onClick={startRecording}>
-                <Mic className="mr-2 h-4 w-4" />
-                Start Recording
-              </Button>
-            )}
-            
-            {recordingState === "recording" && (
-              <Button variant="destructive" onClick={stopRecording}>
-                <StopCircle className="mr-2 h-4 w-4" />
-                Stop Recording
-              </Button>
-            )}
-            
-            {recordingState === "recorded" && (
-              <>
-                <Button variant="outline" onClick={resetRecording}>
-                  Reset
-                </Button>
-                <Button onClick={analyzeRecording}>
-                  Analyze Recording
-                </Button>
-              </>
-            )}
-            
-            {recordingState === "analyzing" && (
-              <Button disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </Button>
+        </div>
+        <div className="live-badge">
+          <div className="status-dot" />
+          <span className="text-sm text-primary">Live</span>
+        </div>
+      </div>
+
+      <div className="ecg-display">
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 1000 100"
+          preserveAspectRatio="none"
+          className="animate-ecg"
+        >
+          <path
+            className="ecg-line"
+            d="M0,50 
+              L100,50 L120,50 L130,20 L140,80 L150,50 
+              L300,50 L320,50 L330,20 L340,80 L350,50 
+              L500,50 L520,50 L530,20 L540,80 L550,50 
+              L700,50 L720,50 L730,20 L740,80 L750,50 
+              L900,50 L920,50 L930,20 L940,80 L950,50 
+              L1000,50"
+          />
+        </svg>
+      </div>
+
+      <div className="metrics-container">
+        <div className="metric-group">
+          <div className="metric-label">
+            <Heart className="h-4 w-4" />
+            Heart Rate
+          </div>
+          <div className="metric-value">
+            {heartRate}
+            <span className="metric-unit">BPM</span>
+            {trend && (
+              <span className={`stat-trend ${trend === "up" ? "trend-up" : "trend-down"}`}>
+                {trend === "up" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                {(trend === "up" ? "+" : "-")}0.1
+              </span>
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="metric-group">
+          <div className="metric-label">
+            <Brain className="h-4 w-4" />
+            AI Confidence
+          </div>
+          <div className="metric-value">
+            {confidence}
+            <span className="metric-unit">%</span>
+          </div>
+        </div>
+
+        <div className="metric-group">
+          <div className="metric-label">
+            <Activity className="h-4 w-4" />
+            HRV Index
+          </div>
+          <div className="metric-value">
+            {variability}
+            <span className="metric-unit">ms</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="assessment">
+        <h2 className="assessment-label">
+          <AlertCircle className="h-4 w-4" />
+          AI Assessment
+        </h2>
+        <div className="assessment-value">
+          <div className="status-dot" />
+          Normal sinus rhythm detected
+        </div>
+      </div>
+    </div>
   );
 }
