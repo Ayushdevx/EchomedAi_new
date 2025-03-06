@@ -118,12 +118,7 @@ export function HeroSection() {
                   
                   <div className="space-y-4">
                     <div className="h-32 w-full rounded-lg bg-muted ecg-grid overflow-hidden">
-                      <svg className="waveform-line" viewBox="0 0 1000 200" preserveAspectRatio="none">
-                        <path
-                          d="M0,100 Q50,100 100,100 T200,100 T300,100 T400,20 T450,180 T500,100 T600,100 T700,100 T800,100 T900,100 T1000,100"
-                          vectorEffect="non-scaling-stroke"
-                        />
-                      </svg>
+                      {/* Waveform removed */}
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2">
