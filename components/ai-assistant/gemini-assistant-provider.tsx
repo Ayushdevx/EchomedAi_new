@@ -593,14 +593,34 @@ export function GeminiAssistantProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function GeminiAssistantDialog() {
-  const { 
-    closeAssistant, 
-    messages, 
-    sendMessage, 
-    isTyping, 
-    currentResponse, 
+function AnimatedDialog({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-20"
+    >
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
+      <Dialog open onOpenChange={() => onClose()}>
+        <DialogContent className="max-w-3xl w-full">
+          {children}
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+}
+
+export function GeminiAssistantDialogWrapper() {
+  const {
+    isOpen,
+    closeAssistant,
+    messages,
+    sendMessage,
+    isTyping,
     clearMessages,
+    currentResponse,
     isListening,
     startListening,
     stopListening,
@@ -609,7 +629,6 @@ function GeminiAssistantDialog() {
     copyToClipboard,
     downloadChatAsPDF,
     isCopied,
-    // Text-to-speech properties
     isSpeaking,
     textToSpeechEnabled,
     toggleTextToSpeech,
@@ -620,344 +639,309 @@ function GeminiAssistantDialog() {
     speechPitch,
     setSpeechPitch,
     speechVolume,
-    setSpeechVolume
+    setSpeechVolume,
   } = useGeminiAssistant();
-  
-  const [inputValue, setInputValue] = useState("");
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const [userInput, setUserInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, currentResponse]);
+
+  // Focus input when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const messageToSend = isListening ? transcript : inputValue;
-    if (messageToSend.trim()) {
-      sendMessage(messageToSend);
-      setInputValue("");
+    if (userInput.trim()) {
+      sendMessage(userInput);
+      setUserInput("");
       setTranscript("");
-      if (isListening) {
-        stopListening();
-      }
     }
   };
 
-  React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping, currentResponse]);
-
-  React.useEffect(() => {
-    if (isListening) {
-      setInputValue(transcript);
-    }
-  }, [transcript, isListening]);
-
-  // Focus input when assistant opens
-  React.useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
-  // Filter out system messages for display
-  const displayMessages = messages.filter(msg => msg.role !== "system");
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="fixed bottom-6 right-6 z-50 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
-      >
-        <div className="flex flex-col h-[600px] bg-background border border-border">
-          <motion.div 
-            className="flex items-center justify-between p-4 bg-primary text-primary-foreground"
-            initial={{ y: -10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="h-10 w-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                  <Volume2 className="h-5 w-5" />
-                </div>
-                <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-400 animate-pulse" />
-              </div>
-              <div>
-                <h3 className="font-medium">Dr. Echo</h3>
-                <p className="text-xs opacity-80">EchoMed AI Health Assistant</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1">
-              {/* Text-to-speech toggle button */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-primary-foreground opacity-80 hover:opacity-100"
-                      onClick={toggleTextToSpeech}
-                    >
-                      {textToSpeechEnabled ? 
-                        <Volume2 className="h-4 w-4" /> : 
-                        <VolumeX className="h-4 w-4" />
-                      }
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{textToSpeechEnabled ? "Disable voice" : "Enable voice"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              {/* Voice settings */}
-              {textToSpeechEnabled && (
-                <Popover>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <PopoverTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-primary-foreground opacity-80 hover:opacity-100"
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </PopoverTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Voice settings</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <PopoverContent className="w-72">
-                    <div className="space-y-4 p-2">
-                      <h4 className="font-medium text-sm">Voice Settings</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Speed</span>
-                          <span className="text-sm text-muted-foreground">{speechRate.toFixed(1)}x</span>
-                        </div>
-                        <Slider 
-                          value={[speechRate]} 
-                          min={0.5} 
-                          max={2} 
-                          step={0.1} 
-                          onValueChange={(value) => setSpeechRate(value[0])} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Pitch</span>
-                          <span className="text-sm text-muted-foreground">{speechPitch.toFixed(1)}</span>
-                        </div>
-                        <Slider 
-                          value={[speechPitch]} 
-                          min={0.5} 
-                          max={1.5} 
-                          step={0.1} 
-                          onValueChange={(value) => setSpeechPitch(value[0])} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Volume</span>
-                          <span className="text-sm text-muted-foreground">{(speechVolume * 100).toFixed(0)}%</span>
-                        </div>
-                        <Slider 
-                          value={[speechVolume]} 
-                          min={0} 
-                          max={1} 
-                          step={0.1} 
-                          onValueChange={(value) => setSpeechVolume(value[0])} 
-                        />
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
+      <AnimatedDialog onClose={closeAssistant}>
+        <DialogHeader>
+          <DialogTitle>Dr. Echo - AI Health Assistant</DialogTitle>
+          <DialogDescription>
+            Your personal AI health assistant powered by advanced medical knowledge.
+          </DialogDescription>
+        </DialogHeader>
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-primary-foreground opacity-80 hover:opacity-100" onClick={downloadChatAsPDF}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Download chat as PDF</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-primary-foreground opacity-80 hover:opacity-100">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Clear conversation?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will remove all messages in this conversation. This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={clearMessages}>Continue</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              
-              <Button variant="ghost" size="icon" className="text-primary-foreground opacity-80 hover:opacity-100" onClick={closeAssistant}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-          
-          <ScrollArea className="flex-1 p-4 space-y-4">
-            <motion.div
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              {displayMessages.map((message, index) => (
-                <motion.div
+        <div className="flex flex-col space-y-4">
+          <ScrollArea className="h-[60vh] pr-4">
+            <div className="space-y-4">
+              {messages.slice(2).map((message) => (
+                <div
                   key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 + 0.2 }}
                   className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
+                    message.role === "assistant" ? "justify-start" : "justify-end"
                   }`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                      message.role === "assistant"
+                        ? "bg-muted"
+                        : "bg-primary text-primary-foreground"
                     }`}
                   >
-                    <div className="relative">
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      <div className="flex items-center justify-between mt-2 text-xs opacity-70">
-                        <span>
-                          {new Date(message.timestamp).toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
-                        
-                        {message.role === "assistant" && (
-                          <div className="flex space-x-1">
-                            {/* Text-to-speech play/stop button for messages */}
-                            {textToSpeechEnabled && (
-                              <button 
-                                onClick={() => {
-                                  if (isSpeaking) {
-                                    stopSpeaking();
-                                  } else {
-                                    speakMessage(message.content);
-                                  }
-                                }}
-                                className="opacity-70 hover:opacity-100 transition-opacity"
-                                aria-label={isSpeaking ? "Stop speaking" : "Read aloud"}
-                              >
-                                {isSpeaking ? 
-                                  <StopCircle className="h-3 w-3" /> : 
-                                  <PlayCircle className="h-3 w-3" />
-                                }
-                              </button>
-                            )}
-                            <button 
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <div className="flex items-center justify-end gap-2 mt-1">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4"
                               onClick={() => copyToClipboard(message.content)}
-                              className="opacity-70 hover:opacity-100 transition-opacity"
-                              aria-label="Copy to clipboard"
                             >
-                              {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                              {isCopied ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Copy message</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      {message.role === "assistant" && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4"
+                                onClick={() =>
+                                  textToSpeechEnabled
+                                    ? isSpeaking
+                                      ? stopSpeaking()
+                                      : speakMessage(message.content)
+                                    : null
+                                }
+                                disabled={!textToSpeechEnabled}
+                              >
+                                {isSpeaking ? (
+                                  <StopCircle className="h-3 w-3" />
+                                ) : (
+                                  <PlayCircle className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {textToSpeechEnabled
+                                  ? isSpeaking
+                                    ? "Stop speaking"
+                                    : "Speak message"
+                                  : "Text-to-speech disabled"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
-              
               {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex justify-start"
-                >
-                  <div className="bg-muted rounded-2xl px-4 py-3 shadow-sm max-w-[85%]">
-                    {currentResponse ? (
-                      <div>
-                        <div className="text-sm whitespace-pre-wrap">
-                          {currentResponse}
-                        </div>
-                        <div className="flex items-center mt-2 text-xs opacity-70">
-                          <Loader2 className="animate-spin h-3 w-3 mr-1" />
-                          <span>Thinking...</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex space-x-1">
-                        <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
-                        <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "600ms" }} />
-                      </div>
-                    )}
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-lg px-4 py-2 max-w-[80%]">
+                    <p className="text-sm">
+                      {currentResponse || (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Thinking...
+                        </span>
+                      )}
+                    </p>
                   </div>
-                </motion.div>
+                </div>
               )}
               <div ref={messagesEndRef} />
-            </motion.div>
+            </div>
           </ScrollArea>
-          
-          <motion.div
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="p-4 border-t"
-          >
-            <form onSubmit={handleSubmit} className="flex space-x-2">
+
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={toggleTextToSpeech}
+                    className="shrink-0"
+                  >
+                    {textToSpeechEnabled ? (
+                      <Volume2 className="h-4 w-4" />
+                    ) : (
+                      <VolumeX className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Toggle text-to-speech</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {textToSpeechEnabled && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="icon" className="shrink-0">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Rate</span>
+                        <span className="text-sm text-muted-foreground">
+                          {speechRate.toFixed(1)}x
+                        </span>
+                      </div>
+                      <Slider
+                        value={[speechRate]}
+                        min={0.5}
+                        max={2}
+                        step={0.1}
+                        onValueChange={([value]) => setSpeechRate(value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Pitch</span>
+                        <span className="text-sm text-muted-foreground">
+                          {speechPitch.toFixed(1)}
+                        </span>
+                      </div>
+                      <Slider
+                        value={[speechPitch]}
+                        min={0.5}
+                        max={2}
+                        step={0.1}
+                        onValueChange={([value]) => setSpeechPitch(value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Volume</span>
+                        <span className="text-sm text-muted-foreground">
+                          {(speechVolume * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      <Slider
+                        value={[speechVolume]}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                        onValueChange={([value]) => setSpeechVolume(value)}
+                      />
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+
+            <form onSubmit={handleSubmit} className="flex-1 flex gap-2">
               <div className="relative flex-1">
                 <Input
                   ref={inputRef}
-                  value={isListening ? transcript : inputValue}
-                  onChange={(e) => isListening ? setTranscript(e.target.value) : setInputValue(e.target.value)}
-                  placeholder="Type your health question..."
-                  className="w-full"
-                  disabled={isTyping}
+                  value={isListening ? transcript : userInput}
+                  onChange={(e) =>
+                    isListening
+                      ? setTranscript(e.target.value)
+                      : setUserInput(e.target.value)
+                  }
+                  placeholder="Type your message..."
+                  className="pr-10"
                 />
-                {isListening && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                  </div>
-                )}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={isListening ? stopListening : startListening}
+                      >
+                        {isListening ? (
+                          <MicOff className="h-4 w-4 text-destructive" />
+                        ) : (
+                          <Mic className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isListening ? "Stop listening" : "Start listening"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
-              
-              <Button 
-                type="button" 
-                size="icon" 
-                variant={isListening ? "destructive" : "outline"}
-                onClick={isListening ? stopListening : startListening}
-                disabled={isTyping}
-              >
-                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
-              
-              <Button type="submit" disabled={isTyping || (!inputValue.trim() && !transcript.trim())}>
+              <Button type="submit" disabled={!userInput.trim() && !transcript.trim()}>
                 <Send className="h-4 w-4" />
               </Button>
             </form>
-          </motion.div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear conversation?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete your conversation history.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearMessages}>
+                    Clear
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={downloadChatAsPDF}
+                    className="shrink-0"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Download conversation</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
-      </motion.div>
+      </AnimatedDialog>
     </AnimatePresence>
   );
 }

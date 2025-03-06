@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { AIAssistantProvider } from '@/components/ai-assistant/ai-assistant-provider';
-import { GeminiAssistantProvider } from '@/components/ai-assistant/gemini-assistant-provider';
+import { GeminiAssistantProvider, GeminiAssistantDialogWrapper } from '@/components/ai-assistant/gemini-assistant-provider';
 import GeminiAssistantButton from '@/components/ai-assistant/gemini-assistant-button';
 import { Toaster as SonnerToaster } from 'sonner';
 
@@ -38,6 +38,7 @@ export default function RootLayout({
               <Footer />
             </div>
             <GeminiAssistantButton />
+            <GeminiAssistantDialogWrapper />
             <Toaster />
             <SonnerToaster position="top-right" closeButton theme="dark" richColors />
           </GeminiAssistantProvider>
