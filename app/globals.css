@@ -3019,41 +3019,123 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Meditation Styles */
-@keyframes breatheAnimation {
+/* Menstruation Tracker Styles */
+.pain-level-slider {
+  height: 8px;
+  position: relative;
+  overflow: visible;
+}
+
+.pain-level-slider [data-radix-slider-thumb] {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(to bottom right, #f97316, #ea580c);
+  border: 2px solid white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.pain-level-slider [data-radix-slider-thumb]:hover {
+  transform: scale(1.2);
+}
+
+.pain-level-slider [data-radix-slider-range] {
+  background: linear-gradient(to right, #f97316, #ea580c);
+}
+
+@keyframes cycleCardGlow {
+  0%, 100% {
+    box-shadow: 0 8px 25px -5px rgba(219, 39, 119, 0.15);
+  }
+  50% {
+    box-shadow: 0 8px 30px -5px rgba(219, 39, 119, 0.3);
+  }
+}
+
+.cycle-card {
+  animation: cycleCardGlow 5s infinite;
+}
+
+@keyframes phaseIndicatorPulse {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.7;
+    opacity: 0.8;
   }
   50% {
-    transform: scale(1.3);
-    opacity: 0.3;
+    transform: scale(1.1);
+    opacity: 1;
   }
 }
 
-.meditation-breath-circle {
-  animation: breatheAnimation 4s infinite ease-in-out;
+.phase-indicator {
+  animation: phaseIndicatorPulse 2s infinite;
 }
 
-@keyframes glowPulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 2px rgba(45, 212, 191, 0.5));
-  }
-  50% {
-    filter: drop-shadow(0 0 15px rgba(45, 212, 191, 0.3));
-  }
-}
-
-.meditation-timer-ring {
-  animation: glowPulse 4s infinite;
-}
-
-.meditation-badge {
+.cycle-insights-card {
   position: relative;
   overflow: hidden;
 }
 
-.meditation-badge::after {
+.cycle-insights-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(-45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  animation: shineEffect 3s infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.floating-icon {
+  animation: floatIcon 3s ease-in-out infinite;
+}
+
+.cycle-phase-tip {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.cycle-phase-tip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cycle-calendar {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.cycle-calendar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.cycle-stat-card {
+  transition: all 0.3s ease;
+}
+
+.cycle-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cycle-phase-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.cycle-phase-badge::after {
   content: '';
   position: absolute;
   top: -50%;
@@ -3061,78 +3143,53 @@
   width: 200%;
   height: 200%;
   background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0) 100%
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
   );
-  transform: rotate(25deg) translateY(-15%);
-  animation: shimmerEffect 3s infinite;
+  animation: shimmer 2s infinite;
 }
 
-.ambient-sound-card {
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
 }
 
-.ambient-sound-card:hover {
-  transform: translateY(-3px);
+.mood-selector {
+  transition: all 0.2s ease;
 }
 
-.ambient-sound-card::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #14b8a6, #4ade80);
-  z-index: -1;
-  border-radius: 12px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.mood-selector:hover {
+  transform: scale(1.02);
 }
 
-.ambient-sound-card.selected::before {
-  opacity: 1;
+.mood-emoji {
+  transition: all 0.2s ease;
 }
 
-.meditation-stats-card {
-  position: relative;
-  overflow: hidden;
+.mood-selector:hover .mood-emoji {
+  transform: scale(1.2);
 }
 
-.meditation-stats-card::after {
-  content: '';
-  position: absolute;
-  top: -10%;
-  right: -10%;
-  width: 60%;
-  height: 70%;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.1) 0%, rgba(45, 212, 191, 0) 70%);
-  border-radius: 50%;
-  z-index: 0;
+/* Symptoms Tracker Styles */
+.symptom-item {
+  @apply transition-transform duration-200;
 }
 
-.meditation-streak-indicator {
-  display: flex;
-  gap: 3px;
+.symptom-item:hover .symptom-checkbox {
+  @apply ring-2 ring-offset-2 ring-current ring-opacity-20;
 }
 
-.streak-day {
-  width: 6px;
-  height: 20px;
-  border-radius: 3px;
-  background-color: rgba(45, 212, 191, 0.2);
-  transition: all 0.3s ease;
+.symptom-checkbox {
+  @apply transition-all duration-200;
 }
 
-.streak-day.active {
-  background-color: #2dd4bf;
-}
-
-@keyframes fadeInUp {
+@keyframes symptomFadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -3143,19 +3200,254 @@
   }
 }
 
-.session-card {
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
+.symptom-item {
+  animation: symptomFadeIn 0.3s ease-out forwards;
 }
 
-.session-card:nth-child(1) {
+.symptom-item:nth-child(odd) {
   animation-delay: 0.1s;
 }
 
-.session-card:nth-child(2) {
+.symptom-item:nth-child(even) {
   animation-delay: 0.2s;
 }
 
-.session-card:nth-child(3) {
-  animation-delay: 0.3s;
+/* Hover effect for symptom categories */
+.symptom-category {
+  @apply transition-all duration-300;
+}
+
+.symptom-category:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+/* Custom checkbox styles */
+.symptom-checkbox [data-state="checked"] {
+  @apply scale-110 transition-transform duration-200;
+}
+
+/* Selected symptoms counter animation */
+@keyframes counterPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.selected-symptoms-counter {
+  animation: counterPulse 1s ease-in-out infinite;
+}
+
+/* Cycle Visualization Styles */
+.cycle-visualization {
+  @apply relative transition-all duration-300;
+}
+
+.cycle-visualization svg {
+  @apply transition-transform duration-300;
+}
+
+.cycle-visualization:hover svg {
+  @apply scale-105;
+}
+
+.phase-circle {
+  @apply transition-all duration-300;
+}
+
+.phase-circle:hover {
+  @apply opacity-80;
+}
+
+.current-day-indicator {
+  @apply transition-all duration-300;
+}
+
+.current-day-indicator:hover {
+  @apply scale-110;
+}
+
+/* Phase card styles */
+.phase-card {
+  @apply transition-all duration-300;
+}
+
+.phase-card:hover {
+  @apply transform -translate-y-1;
+}
+
+.phase-info-card {
+  @apply transition-all duration-300 hover:shadow-lg;
+}
+
+.phase-info-card:hover {
+  @apply transform -translate-y-1;
+}
+
+.phase-icon {
+  @apply transition-all duration-300;
+}
+
+.phase-info-card:hover .phase-icon {
+  @apply transform scale-110 rotate-12;
+}
+
+.recommendation-item {
+  @apply transition-all duration-200 p-2 rounded-lg;
+}
+
+.recommendation-item:hover {
+  @apply bg-black/5 dark:bg-white/5 -translate-x-1;
+}
+
+.phase-badge {
+  @apply animate-pulse;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+}
+
+.phase-indicator {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Phase-specific gradients */
+.menstrual-gradient {
+  @apply bg-gradient-to-br from-red-100 to-pink-50 dark:from-red-950/30 dark:to-pink-900/20;
+  filter: saturate(1.2);
+}
+
+.follicular-gradient {
+  @apply bg-gradient-to-br from-pink-100 to-purple-50 dark:from-pink-950/30 dark:to-purple-900/20;
+  filter: saturate(1.2);
+}
+
+.ovulatory-gradient {
+  @apply bg-gradient-to-br from-yellow-100 to-orange-50 dark:from-yellow-950/30 dark:to-orange-900/20;
+  filter: saturate(1.2);
+}
+
+.luteal-gradient {
+  @apply bg-gradient-to-br from-purple-100 to-blue-50 dark:from-purple-950/30 dark:to-blue-900/20;
+  filter: saturate(1.2);
+}
+
+/* Recommendation icon animations */
+@keyframes iconSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.recommendation-icon {
+  @apply transition-all duration-300;
+}
+
+.recommendation-item:hover .recommendation-icon {
+  animation: iconSpin 1s ease-in-out;
+  @apply text-current;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  10%, 90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in-out {
+  animation: fadeInOut 3s ease-in-out;
+}
+
+/* Analysis Page Styles */
+.cycle-history-table th {
+  @apply text-base text-gray-700 dark:text-gray-300;
+}
+
+.cycle-history-table tr {
+  @apply transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50;
+}
+
+.cycle-progress {
+  @apply h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden;
+}
+
+.cycle-progress-bar {
+  @apply h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300;
+}
+
+.symptom-tag {
+  @apply px-2 py-1 rounded-full text-xs font-medium transition-all duration-300;
+}
+
+.symptom-tag-pain {
+  @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300;
+}
+
+.symptom-tag-mood {
+  @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300;
+}
+
+.symptom-tag-physical {
+  @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
+}
+
+.stats-card {
+  @apply overflow-hidden backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 border-0 shadow-xl;
+}
+
+.stats-card .stats-value {
+  @apply text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600;
+}
+
+.floating-card {
+  @apply transition-transform duration-300 hover:-translate-y-1;
+}
+
+.cycle-badge {
+  @apply transition-all duration-300;
+}
+
+/* Card hover effects */
+.stats-card:hover {
+  @apply shadow-2xl shadow-purple-500/10;
+}
+
+/* Progress bar animations */
+.cycle-progress-bar {
+  animation: shimmer 2s infinite linear;
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
